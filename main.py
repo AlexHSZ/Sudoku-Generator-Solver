@@ -1,60 +1,78 @@
-from random import shuffle
-import copy
+board = [
+    [7,8,0,4,0,0,1,2,0],
+    [6,0,0,0,7,5,0,0,9],
+    [0,0,0,6,0,1,0,7,8],
+    [0,0,7,0,4,0,2,6,0],
+    [0,0,1,0,5,0,9,3,0],
+    [9,0,4,0,6,0,0,0,5],
+    [0,7,0,3,0,0,0,1,2],
+    [1,2,0,0,0,7,4,0,0],
+    [0,4,9,2,0,6,0,0,7]
+]
 
-class main:
+def solve(self):
 
-    def __init__(self, grid = None):
-        self.counter = 0
-        # Path is for the matplotlib animation
-        self.path = []
-        # If a grid/puzzle is passed in, make a copy to solve
-        if grid:
-            if len(grid[0]) == 9 and len(grid) == 9:
-                self.grid = grid
-                self.original = copy.deepcopy(grid)
-                self.solve_input_sudoku()
-            else:
-                print("Input needs to be a 9x9 matrix")
-        else:
-            # If not puzzle is passed then one is generated
-            self.grid = [[0 for i in range(9)] for j in range(9)]
-            self.generate_puzzle()
-            self.original = copy.deepcopy(self.grid)
+    find = find_empty(self)
+    if not find:
+        return True
+    else:
+        row, col = find
+    
+    for i in range(1, 10):
+        if valid(self, i, (row, col)):
+            self[row][col] = i
+            
+            if solve(self):
+                return True
+            
+            self[row][col] = 0
 
-def generate_puzzle(self):
-    """ Generates new puzzle and solves it """
-    self.generate_solution(self.grid)
-    self.print_grid('Full solution')
-    self.remove_numbers_from_grid()
-    self.print_grid("With remove numbers")
-    return
-
-def print_grid(self, grid_name = None):
-    if grid_name:
-        print(grid_name)
-    for row in self.grid:
-        print(row)
-    return
-
-def generate_solution(self, grid):
-    """ Generates a full solution using backtracking"""
-    number_list = [1,2,3,4,5,6,7,8,9]
-    for i in range(0, 81):
-        row = i // 9
-        col = i % 9
-        # Find the next empty #
-        if grid[row][col] == 0:
-            shuffle(number_list)
-            for number in number_list:
-                if self.valid_location(grid, row, col, number):
-                    self.path.append((number, row, col))
-                    grid[row][col] = number
-                    if not self.find_empty_square(grid):
-                        return True
-                    else:
-                        if self.generate_solution(grid):
-                            # If the grid is full
-                            return True
-            break
-    grid[row][col] = 0
     return False
+
+def valid(self, num, pos):
+    # Check row
+    for i in range(len(self[0])):
+        if self[pos[0]][i] == num and pos[1] != i:
+            return False
+
+    # Check column
+    for i in range(len(self)):
+        if self[i][pos[1]] == num and pos[0] != i:
+            return False
+
+    # Check subgrid
+    subX = pos[1] // 3
+    subY = pos[0] // 3
+
+    for i in range(subY * 3, subY * 3 + 3):
+        for j in range(subX * 3, subX * 3 + 3):
+            if self[i][j] == num and (i, j) != pos:
+                return False
+
+    return True
+
+def print_board(self):
+    for i in range(len(self)):
+        if i % 3 == 0 and i != 0:
+            print("- - - - - - - - - - - -")
+        
+        for j in range(len(self[0])):
+            if j % 3 == 0 and j != 0:
+                print(" | ", end="")
+
+            if j == 8:
+                print(self[i][j])
+            else:
+                print(str(self[i][j]) + " ", end="")
+
+def find_empty(self):
+    for i in range(len(self)):
+        for j in range(len(self[0])):
+            if self[i][j] == 0:
+                return (i, j) # Tuple of row, col
+
+print_board(board)
+solve(board)
+print(" ============================== ")
+print_board(board)
+
